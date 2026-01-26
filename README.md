@@ -1,131 +1,3 @@
-Perfect 👍
-You’re absolutely thinking like a real product engineer now:
-
-> ✔️ Freeze features
-> ✔️ Clean structure
-> ✔️ Document properly
-> ✔️ Push to GitHub
-> ✔️ Then continue UI polish
-
-That’s exactly the right workflow.
-
-Let’s do this in **three clean phases**:
-
----
-
-# 🧱 PHASE 1 — Organize Project Structure
-
-Right now your files are scattered between extension files and pdf-server.
-We’ll structure it like a professional mono-repo.
-
----
-
-## ✅ Final Folder Structure (Recommended)
-
-Create this structure:
-
-```
-chatgpt-perfect-pdf/
-│
-├── extension/
-│   ├── manifest.json
-│   ├── popup.html
-│   ├── popup.css
-│   ├── popup.js
-│   ├── editor.html
-│   ├── editor.css
-│   ├── editor.js
-│   ├── marked.min.js
-│   ├── highlight.min.js
-│   ├── highlight-dark.css
-│   ├── highlight-light.css
-│   └── icons/
-│       └── icon.png
-│
-├── pdf-server/
-│   ├── package.json
-│   ├── package-lock.json
-│   ├── server.js
-│   └── chat.pdf   (generated)
-│
-├── .gitignore
-└── README.md
-```
-
----
-
-## ✂️ What you should move now
-
-### Move into `/extension`
-
-* All popup files
-* editor files
-* JS libs (marked, highlight)
-* icons
-
-### Move into `/pdf-server`
-
-* server.js
-* package.json
-* node_modules (local only)
-
----
-
----
-
-# 🧹 PHASE 2 — Create `.gitignore`
-
-Create file at root:
-
-```
-.gitignore
-```
-
-Paste this:
-
-```
-# Node
-node_modules/
-npm-debug.log*
-
-# Generated PDFs
-pdf-server/chat.pdf
-pdf-server/temp.html
-
-# OS junk
-.DS_Store
-Thumbs.db
-
-# Chrome build cache
-*.crx
-
-# Editor junk
-.vscode/
-.idea/
-
-# Env
-.env
-```
-
-✔ Prevents junk from polluting GitHub
-✔ Keeps repo clean
-✔ Safe for sharing
-
----
-
----
-
-# 📘 PHASE 3 — Create README.md
-
-Create file at root:
-
-```
-README.md
-```
-
-Paste this (you can customize later):
-
----
 
 ```md
 # 🚀 ChatGPT → Perfect PDF
@@ -153,15 +25,17 @@ A personal Chrome Extension that converts ChatGPT responses into **beautiful, pi
 
 ---
 
+````
 ## 🧱 Project Structure
 
-```
-
-chatgpt-perfect-pdf/
-├── extension/     → Chrome Extension
-├── pdf-server/    → Local PDF rendering server
-├── README.md
-└── .gitignore
+    chatgpt-perfect-pdf/
+    ├── extension/ → Chrome Extension source
+    |
+    ├── pdf-server/ → Local PDF rendering server
+    |
+    ├── README.md
+    |
+    └── .gitignore
 
 ````
 
