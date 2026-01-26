@@ -1,0 +1,333 @@
+/* ---------- FONTS ---------- */
+
+@font-face {
+  font-family: "Inter";
+  src: url("fonts\Inter-Regular.woff2") format("woff2");
+  font-weight: 400;
+}
+
+@font-face {
+  font-family: "Inter";
+  src: url("fonts/Inter-SemiBold.woff2") format("woff2");
+  font-weight: 600;
+}
+
+/* ---------- THEME VARIABLES ---------- */
+
+:root {
+  /* Dark Theme */
+  --app-bg: #020617;
+  --panel-bg: #020617;
+  --border-color: #1e293b;
+
+  /* Code Theme (Dark) */
+  --code-bg: #111827;          /* darker for more contrast */
+  --code-border: #1e293b;
+  --code-header-bg: #0b1220;
+  --code-text: #e5e7eb;
+}
+
+body.light {
+  /* Light Theme */
+  --app-bg: #f1f5f9;
+  --panel-bg: #ffffff;
+  --border-color: #cbd5e1;
+
+  /* Code Theme (Light) */
+  --code-bg: #f8fafc;
+  --code-border: #cbd5e1;
+  --code-header-bg: #eef2f7;
+  --code-text: #020617;
+}
+
+/* ---------- BASE LAYOUT ---------- */
+
+body {
+  overflow: hidden;
+  margin: 0;
+  background: var(--app-bg);
+  color: var(--code-text);
+  font-family: "Inter", system-ui, sans-serif;
+  height: 100vh;
+}
+
+nav {
+  height: 50px;
+  background: var(--panel-bg);
+  border-bottom: 1px solid var(--border-color);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 12px;
+}
+
+main {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 6px minmax(0, 1fr);
+  height: calc(100vh - 50px);
+  overflow: hidden;
+}
+.scroll-wrapper {
+  position: relative;
+  height: 100%;
+  width: 100%;
+  overflow: hidden;
+  display: flex;
+}
+
+.scroll-wrapper > * {
+  flex: 1;
+  width: 100%;
+  height: 100%;
+}
+
+
+textarea {
+  height: 100%;
+  overflow-y: auto;
+  border: none;
+  outline: none;
+  padding: 12px;
+  background: var(--panel-bg);
+  color: var(--code-text);
+  resize: none;
+}
+/* ---------- READING SCALE (1.5x) ---------- */
+
+textarea {
+  scroll-behavior: smooth;
+  font-size: 1rem;     /* editor typing size */
+  line-height: 1.5;
+}
+
+
+/* Keep headings normal size (not scaled) */
+#preview h1,
+#preview h2,
+#preview h3,
+#preview h4,
+#preview h5,
+#preview h6 {
+  font-size: revert;
+}
+
+
+/* ---------- PREVIEW CONTENT ---------- */
+
+#preview {
+  overflow-y: auto;
+  font-size: 1.5rem;     /* rendered content size */
+  line-height: 1.7;
+  scroll-behavior: smooth;
+  height: 100%;
+  padding: 1px;
+  overflow-y: auto;
+  border-left: 1px solid var(--border-color);
+}
+
+#preview ul,
+#preview ol {
+  padding-left: 20px;
+  margin: 8px 0;
+}
+
+#preview li {
+  margin: 4px 0;
+}
+/* ---------- TYPOGRAPHY SCALE ---------- */
+
+#preview {
+  font-size: 15px;
+  line-height: 1.45;
+}
+
+#preview h1 {
+  font-size: 26px;
+  font-weight: 600;
+  margin-bottom: 6px;
+}
+
+#preview h2 {
+  font-size: 18px;
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+
+#preview h3 {
+  font-size: 16px;
+  font-weight: 600;
+  margin-bottom: 3px;
+}
+
+#preview p,
+#preview li {
+  font-size: 15px;
+  line-height: 1.45;
+  margin-bottom: 4px;
+  font-weight: 400;
+}
+
+#preview ul,
+#preview ol {
+  font-weight: 400;
+  padding-left: 18px;
+}
+/* ---------- HR DIVIDER ---------- */
+
+#preview hr {
+  border: none;
+  height: 1px;
+  background: rgba(148,163,184,0.4);
+  margin: 6px 0;        /* tight spacing */
+}
+
+
+/* ---------- NAVBAR ICONS ---------- */
+
+.nav-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.icon-btn {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  color: var(--code-text);
+  padding: 6px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.icon-btn:hover {
+  background: rgba(148, 163, 184, 0.15);
+}
+
+/* ---------- CODE BLOCK STYLING ---------- */
+
+.code-block {
+  position: relative;
+  background: var(--code-bg);
+  border: 1px solid var(--code-border);
+  border-radius: 10px;
+  margin: 12px 0;
+  overflow: hidden;
+
+  /* Softer shadow */
+  box-shadow: 0 2px 6px rgba(0,0,0,0.12);
+}
+
+.code-header {
+  display: flex;
+  justify-content: flex-end;
+  padding: 6px 10px;
+  background: var(--code-header-bg);
+  border-bottom: 1px solid var(--code-border);
+}
+
+.copy-btn {
+  font-size: 11px;
+  background: transparent;
+  border: none;
+  color: #38bdf8;
+  cursor: pointer;
+}
+
+.copy-btn:hover {
+  text-decoration: underline;
+}
+
+.code-block pre {
+  margin: 0;
+  padding: 14px;
+  overflow-x: auto;
+  background: transparent;
+  color: var(--code-text);
+
+  /* Bigger and clearer code */
+  font-family: Consolas, Monaco, monospace;
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+/*Font size buttons*/
+#fontMinus, #fontPlus {
+  font-size: 14px;
+  background: transparent;
+  border: none;
+  color: var(--code-text);
+  cursor: pointer;
+  padding: 6px;
+  border-radius: 6px;
+}
+
+/* ---------- RESIZER ---------- */
+
+#resizer {
+  height: 100%;
+  z-index: 10;
+  width: 6px;
+  cursor: col-resize;
+  background: transparent;
+  position: relative;
+}
+
+#resizer::after {
+  content: "";
+  position: absolute;
+  left: 2px;
+  top: 0;
+  width: 2px;
+  height: 100%;
+  background: var(--border-color);
+}
+
+/* ---------- CUSTOM SCROLLBAR (ChatGPT Style) ---------- */
+
+/* Works for Chrome, Edge, Brave */
+textarea::-webkit-scrollbar,
+#preview::-webkit-scrollbar {
+  width: 8px;
+}
+
+textarea::-webkit-scrollbar-track,
+#preview::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+textarea::-webkit-scrollbar-thumb,
+#preview::-webkit-scrollbar-thumb {
+  background-color: rgba(148, 163, 184, 0.0);
+  border-radius: 10px;
+  transition: background 0.25s ease;
+}
+
+/* Show on hover or scrolling */
+textarea:hover::-webkit-scrollbar-thumb,
+#preview:hover::-webkit-scrollbar-thumb {
+  background-color: rgba(148, 163, 184, 0.45);
+}
+
+textarea::-webkit-scrollbar-thumb:hover,
+#preview::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(148, 163, 184, 0.6);
+}
+
+/* Light theme tweak */
+body.light textarea::-webkit-scrollbar-thumb,
+body.light #preview::-webkit-scrollbar-thumb {
+  background-color: rgba(100, 116, 139, 0.35);
+}
+
+body.light textarea::-webkit-scrollbar-thumb:hover,
+body.light #preview::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(100, 116, 139, 0.6);
+}
+/* ---------- PDF PAGE BREAK ---------- */
+
+.page-break {
+  page-break-before: always;
+  break-before: page;
+}

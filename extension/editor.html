@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Chat → PDF Editor</title>
+    <link rel="stylesheet" href="editor.css" />
+</head>
+
+<body>
+
+    <nav>
+        <span>ChatGPT → Perfect PDF</span>
+        <div class="nav-actions">
+            <button id="fontMinus" class="icon-btn" title="Decrease font">A-</button>
+            <button id="fontPlus" class="icon-btn" title="Increase font">A+</button>
+
+            <button id="themeToggle" title="Toggle Theme" class="icon-btn">
+                <!-- Moon / Sun SVG -->
+                <svg id="themeIcon" width="18" height="18" viewBox="0 0 24 24" fill="none">
+                    <path fill="currentColor" d="M21 12.79A9 9 0 1111.21 3
+           7 7 0 0021 12.79z" />
+                </svg>
+            </button>
+
+            <button id="download" title="Download PDF" class="icon-btn">
+                <!-- Download SVG -->
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+                    <path fill="currentColor" d="M12 3v12m0 0l4-4m-4 4l-4-4M5 21h14" />
+                </svg>
+            </button>
+
+        </div>
+
+    </nav>
+
+    <main>
+        <div class="scroll-wrapper" id="editorWrap">
+            <textarea id="editor"></textarea>
+        </div>
+
+        <div id="resizer"></div>
+
+        <div class="scroll-wrapper" id="previewWrap">
+            <div id="preview"></div>
+        </div>
+    </main>
+    <link id="hlTheme" rel="stylesheet" href="highlight-dark.css">
+
+    <script src="marked.min.js"></script>
+    <script src="highlight.min.js"></script>
+    <script src="editor.js"></script>
+
+</body>
+
+</html>

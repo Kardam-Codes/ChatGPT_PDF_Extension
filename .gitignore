@@ -1,0 +1,21 @@
+# Node
+node_modules/
+npm-debug.log*
+
+# Generated PDFs
+pdf-server/chat.pdf
+pdf-server/temp.html
+
+# OS junk
+.DS_Store
+Thumbs.db
+
+# Chrome build cache
+*.crx
+
+# Editor junk
+.vscode/
+.idea/
+
+# Env
+.env
