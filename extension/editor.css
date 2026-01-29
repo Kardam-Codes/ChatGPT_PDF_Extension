@@ -1,29 +1,22 @@
-/* ---------- FONTS ---------- */
-
-@font-face {
-  font-family: "Inter";
-  src: url("fonts\Inter-Regular.woff2") format("woff2");
-  font-weight: 400;
-}
-
-@font-face {
-  font-family: "Inter";
-  src: url("fonts/Inter-SemiBold.woff2") format("woff2");
-  font-weight: 600;
-}
-
-/* ---------- THEME VARIABLES ---------- */
+/* =========================================================
+   THEME VARIABLES
+========================================================= */
 
 :root {
   /* Dark Theme */
   --app-bg: #020617;
   --panel-bg: #020617;
   --border-color: #1e293b;
+  --accent: #38bdf8;
 
-  /* Code Theme (Dark) */
-  --code-bg: #111827;          /* darker for more contrast */
+  /* Typography */
+  --text-main: #e5e7eb;
+  --text-muted: #94a3b8;
+
+  /* Code */
+  --code-bg: #0b1220;      /* darker than app background */
   --code-border: #1e293b;
-  --code-header-bg: #0b1220;
+  --code-header-bg: #020617;
   --code-text: #e5e7eb;
 }
 
@@ -32,197 +25,216 @@ body.light {
   --app-bg: #f1f5f9;
   --panel-bg: #ffffff;
   --border-color: #cbd5e1;
+  --accent: #2563eb;
 
-  /* Code Theme (Light) */
+  --text-main: #020617;
+  --text-muted: #475569;
+
   --code-bg: #f8fafc;
   --code-border: #cbd5e1;
   --code-header-bg: #eef2f7;
   --code-text: #020617;
 }
 
-/* ---------- BASE LAYOUT ---------- */
+/* =========================================================
+   BASE
+========================================================= */
 
-body {
-  overflow: hidden;
-  margin: 0;
-  background: var(--app-bg);
-  color: var(--code-text);
-  font-family: "Inter", system-ui, sans-serif;
-  height: 100vh;
+* {
+  box-sizing: border-box;
 }
 
+body {
+  margin: 0;
+  background: var(--app-bg);
+  color: var(--text-main);
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+    Roboto, Ubuntu, Cantarell, "Helvetica Neue", Arial, sans-serif;
+  height: 100vh;
+  overflow: hidden;
+}
+
+/* =========================================================
+   NAVBAR
+========================================================= */
+
 nav {
-  height: 50px;
-  background: var(--panel-bg);
+  height: 56px; /* was 50px */
+  background: linear-gradient(
+    90deg,
+    #020617 0%,
+    #020617 40%,
+    #020b2f 100%
+  );
   border-bottom: 1px solid var(--border-color);
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0 12px;
+  padding: 0 16px; /* was 12px */
 }
 
-main {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) 6px minmax(0, 1fr);
-  height: calc(100vh - 50px);
-  overflow: hidden;
+
+body.light nav {
+  background: linear-gradient(
+    90deg,
+    #ffffff 0%,
+    #f8fafc 60%,
+    #eef2ff 100%
+  );
 }
-.scroll-wrapper {
-  position: relative;
-  height: 100%;
-  width: 100%;
-  overflow: hidden;
+
+.nav-title {
+  font-size: 14.5px;
+  font-weight: 600;
+  letter-spacing: 0.25px;
+  color: var(--text-main);
   display: flex;
+  align-items: center;
+  gap: 6px;
 }
 
-.scroll-wrapper > * {
-  flex: 1;
-  width: 100%;
-  height: 100%;
-}
-
-
-textarea {
-  height: 100%;
-  overflow-y: auto;
-  border: none;
-  outline: none;
-  padding: 12px;
-  background: var(--panel-bg);
-  color: var(--code-text);
-  resize: none;
-}
-/* ---------- READING SCALE (1.5x) ---------- */
-
-textarea {
-  scroll-behavior: smooth;
-  font-size: 1rem;     /* editor typing size */
-  line-height: 1.5;
-}
-
-
-/* Keep headings normal size (not scaled) */
-#preview h1,
-#preview h2,
-#preview h3,
-#preview h4,
-#preview h5,
-#preview h6 {
-  font-size: revert;
-}
-
-
-/* ---------- PREVIEW CONTENT ---------- */
-
-#preview {
-  overflow-y: auto;
-  font-size: 1.5rem;     /* rendered content size */
-  line-height: 1.7;
-  scroll-behavior: smooth;
-  height: 100%;
-  padding: 1px;
-  overflow-y: auto;
-  border-left: 1px solid var(--border-color);
-}
-
-#preview ul,
-#preview ol {
-  padding-left: 20px;
-  margin: 8px 0;
-}
-
-#preview li {
-  margin: 4px 0;
-}
-/* ---------- TYPOGRAPHY SCALE ---------- */
-
-#preview {
-  font-size: 15px;
-  line-height: 1.45;
-}
-
-#preview h1 {
-  font-size: 26px;
-  font-weight: 600;
-  margin-bottom: 6px;
-}
-
-#preview h2 {
-  font-size: 18px;
-  font-weight: 600;
-  margin-bottom: 4px;
-}
-
-#preview h3 {
-  font-size: 16px;
-  font-weight: 600;
-  margin-bottom: 3px;
-}
-
-#preview p,
-#preview li {
-  font-size: 15px;
-  line-height: 1.45;
-  margin-bottom: 4px;
-  font-weight: 400;
-}
-
-#preview ul,
-#preview ol {
-  font-weight: 400;
-  padding-left: 18px;
-}
-/* ---------- HR DIVIDER ---------- */
-
-#preview hr {
-  border: none;
-  height: 1px;
-  background: rgba(148,163,184,0.4);
-  margin: 6px 0;        /* tight spacing */
-}
-
-
-/* ---------- NAVBAR ICONS ---------- */
 
 .nav-actions {
   display: flex;
-  gap: 8px;
+  align-items: center;
+  gap: 10px;
 }
 
 .icon-btn {
   background: transparent;
   border: none;
   cursor: pointer;
-  color: var(--code-text);
-  padding: 6px;
-  border-radius: 6px;
+  color: var(--text-main);
+  padding: 7px; /* was 6px */
+  border-radius: 8px;
   display: flex;
   align-items: center;
   justify-content: center;
+  transition: background 0.15s ease, color 0.15s ease;
 }
 
 .icon-btn:hover {
-  background: rgba(148, 163, 184, 0.15);
+  background: rgba(56, 189, 248, 0.12);
+  color: var(--accent);
 }
 
-/* ---------- CODE BLOCK STYLING ---------- */
+.icon-btn:active {
+  background: rgba(56, 189, 248, 0.18);
+}
+
+
+.download-btn svg {
+  stroke-width: 2;
+}
+
+/* =========================================================
+   LAYOUT
+========================================================= */
+
+main {
+  display: grid;
+  grid-template-columns: 1fr 8px 1fr;
+  height: calc(100vh - 50px);
+}
+
+/* Scroll containers */
+.scroll-wrapper {
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+/* =========================================================
+   EDITOR
+========================================================= */
+
+#editor {
+  flex: 1;
+  border: none;
+  outline: none;
+  padding: 14px;
+  background: var(--panel-bg);
+  color: var(--text-main);
+  resize: none;
+  font-size: 14px;            /* 👈 Normal size */
+  line-height: 1.45;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
+    "Liberation Mono", "Courier New", monospace;
+}
+
+/* =========================================================
+   PREVIEW
+========================================================= */
+
+#preview {
+  flex: 1;
+  padding: 14px 18px;
+  overflow-y: auto;
+  border-left: 1px solid var(--border-color);
+  font-size: 1.5rem;          /* 👈 Preview default scale */
+  line-height: 1.55;
+  color: var(--text-main);
+}
+
+/* Headings */
+#preview h1 {
+  font-size: 1.9rem;
+  margin: 14px 0 8px;
+}
+#preview h2 {
+  font-size: 1.6rem;
+  margin: 12px 0 6px;
+}
+#preview h3 {
+  font-size: 1.35rem;
+  margin: 10px 0 4px;
+}
+
+/* Text spacing */
+#preview p {
+  margin: 6px 0;
+}
+
+#preview ul,
+#preview ol {
+  padding-left: 20px;
+  margin: 6px 0;
+}
+
+#preview li {
+  margin: 3px 0;
+}
+
+#preview {
+  font-size: var(--preview-font);
+}
+
+#preview h1 { font-size: var(--h1-scale); }
+#preview h2 { font-size: var(--h2-scale); }
+#preview h3 { font-size: var(--h3-scale); }
+
+/* =========================================================
+   CODE BLOCKS
+========================================================= */
 
 .code-block {
   position: relative;
   background: var(--code-bg);
   border: 1px solid var(--code-border);
   border-radius: 10px;
-  margin: 12px 0;
+  margin: 10px 0;
   overflow: hidden;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+}
 
-  /* Softer shadow */
-  box-shadow: 0 2px 6px rgba(0,0,0,0.12);
+body.light .code-block {
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
 }
 
 .code-header {
   display: flex;
   justify-content: flex-end;
-  padding: 6px 10px;
+  padding: 6px 8px;
   background: var(--code-header-bg);
   border-bottom: 1px solid var(--code-border);
 }
@@ -231,103 +243,100 @@ textarea {
   font-size: 11px;
   background: transparent;
   border: none;
-  color: #38bdf8;
+  color: var(--accent);
   cursor: pointer;
 }
 
 .copy-btn:hover {
-  text-decoration: underline;
+  text-decoration: none;
 }
 
 .code-block pre {
   margin: 0;
-  padding: 14px;
+  padding: 12px 14px;
   overflow-x: auto;
-  background: transparent;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
+    "Liberation Mono", monospace;
+  font-size: 14px;            /* 👈 Bigger code */
+  line-height: 1.45;
   color: var(--code-text);
-
-  /* Bigger and clearer code */
-  font-family: Consolas, Monaco, monospace;
-  font-size: 14px;
-  line-height: 1.6;
 }
 
-/*Font size buttons*/
-#fontMinus, #fontPlus {
-  font-size: 14px;
-  background: transparent;
-  border: none;
-  color: var(--code-text);
-  cursor: pointer;
-  padding: 6px;
-  border-radius: 6px;
+/* Inline code */
+#preview code:not(pre code) {
+  background: rgba(148, 163, 184, 0.15);
+  padding: 2px 5px;
+  border-radius: 4px;
+  font-size: 0.95em;
 }
 
-/* ---------- RESIZER ---------- */
+/* =========================================================
+   RESIZER
+========================================================= */
 
 #resizer {
-  height: 100%;
-  z-index: 10;
-  width: 6px;
+  width: 8px;
   cursor: col-resize;
   background: transparent;
   position: relative;
+  z-index: 100;
 }
 
 #resizer::after {
   content: "";
   position: absolute;
-  left: 2px;
+  left: 3px;
   top: 0;
   width: 2px;
   height: 100%;
   background: var(--border-color);
 }
-
-/* ---------- CUSTOM SCROLLBAR (ChatGPT Style) ---------- */
-
-/* Works for Chrome, Edge, Brave */
-textarea::-webkit-scrollbar,
-#preview::-webkit-scrollbar {
-  width: 8px;
+#resizer:hover {
+  cursor: w-resize;
 }
 
-textarea::-webkit-scrollbar-track,
+#resizer:hover::after {
+  background: var(--accent);
+}
+
+/* =========================================================
+   SCROLLBAR STYLING (EDITOR + PREVIEW)
+========================================================= */
+
+#editor::-webkit-scrollbar,
+#preview::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+#editor::-webkit-scrollbar-track,
 #preview::-webkit-scrollbar-track {
   background: transparent;
 }
 
-textarea::-webkit-scrollbar-thumb,
+#editor::-webkit-scrollbar-thumb,
 #preview::-webkit-scrollbar-thumb {
-  background-color: rgba(148, 163, 184, 0.0);
+  background-color: rgba(148, 163, 184, 0.35);
   border-radius: 10px;
-  transition: background 0.25s ease;
+  transition: background-color 0.2s ease;
 }
 
-/* Show on hover or scrolling */
-textarea:hover::-webkit-scrollbar-thumb,
-#preview:hover::-webkit-scrollbar-thumb {
-  background-color: rgba(148, 163, 184, 0.45);
-}
-
-textarea::-webkit-scrollbar-thumb:hover,
+#editor::-webkit-scrollbar-thumb:hover,
 #preview::-webkit-scrollbar-thumb:hover {
-  background-color: rgba(148, 163, 184, 0.6);
+  background-color: rgba(148, 163, 184, 0.55);
+  cursor: grab;
 }
 
-/* Light theme tweak */
-body.light textarea::-webkit-scrollbar-thumb,
+/* =========================================================
+   LIGHT MODE FIXES
+========================================================= */
+body.light #editor::-webkit-scrollbar-thumb,
 body.light #preview::-webkit-scrollbar-thumb {
-  background-color: rgba(100, 116, 139, 0.35);
+  background-color: rgba(71, 85, 105, 0.35);
 }
 
-body.light textarea::-webkit-scrollbar-thumb:hover,
+body.light #editor::-webkit-scrollbar-thumb:hover,
 body.light #preview::-webkit-scrollbar-thumb:hover {
-  background-color: rgba(100, 116, 139, 0.6);
-}
-/* ---------- PDF PAGE BREAK ---------- */
-
-.page-break {
-  page-break-before: always;
-  break-before: page;
+  background-color: rgba(71, 85, 105, 0.55);
+  cursor: grab;
 }

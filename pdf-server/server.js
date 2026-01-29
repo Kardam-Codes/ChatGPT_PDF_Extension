@@ -1,89 +1,211 @@
-const express = require("express");
-const puppeteer = require("puppeteer");
-const fs = require("fs");
+import express from "express";
+import puppeteer from "puppeteer";
+import cors from "cors";
+import fs from "fs";
+import path from "path";
 
 const app = express();
+const PORT = 3000;
+
+app.use(cors());
 app.use(express.json({ limit: "50mb" }));
 
+/* =========================================================
+   PDF EXPORT ENDPOINT
+========================================================= */
+
 app.post("/export", async (req, res) => {
+  const { html, theme } = req.body;
+
+  if (!html) {
+    return res.status(400).json({ error: "No HTML provided" });
+  }
+
+  let browser;
   try {
-    const { html, theme } = req.body;
+    browser = await puppeteer.launch({
+      headless: "new",
+      args: [
+        "--no-sandbox",
+        "--disable-setuid-sandbox",
+        "--font-render-hinting=medium"
+      ]
+    });
 
-    const finalHTML = `
-    <html>
-    <head>
-    <meta charset="UTF-8">
-    <style>
-      body {
-        margin: 0;
-        padding: 1px;
-        background: white;
-      }
-    </style>
-    </head>
-    <body>
-      ${html}
-    </body>
-    </html>
-    `;
-
-
-    fs.writeFileSync("temp.html", finalHTML);
-
-    const browser = await puppeteer.launch();
     const page = await browser.newPage();
 
-    await page.goto("file://" + __dirname + "/temp.html", {
+    /* -----------------------------------------------------
+       BASE DOCUMENT TEMPLATE
+    ----------------------------------------------------- */
+
+    const background = theme === "light" ? "#ffffff" : "#020617";
+    const textColor = theme === "light" ? "#020617" : "#e5e7eb";
+    const borderColor = theme === "light" ? "#cbd5e1" : "#1e293b";
+
+    const documentHTML = `
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8" />
+  <style>
+    @page {
+      size: A4;
+      margin: 22mm 18mm 24mm 18mm;
+    }
+
+    body {
+      margin: 0;
+      padding: 0;
+      background: ${background};
+      color: ${textColor};
+      font-family: system-ui, -apple-system, BlinkMacSystemFont,
+        "Segoe UI", Roboto, Ubuntu, Cantarell,
+        "Helvetica Neue", Arial, sans-serif;
+      line-height: 1.5;
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
+    }
+
+    /* -------- PAGE WRAPPER -------- */
+    .pdf-root {
+      width: 100%;
+      box-sizing: border-box;
+    }
+
+    /* -------- PAGE BREAK -------- */
+    .page-break {
+      page-break-before: always;
+    }
+
+    /* -------- CODE BLOCK -------- */
+    pre {
+      background: ${theme === "light" ? "#f8fafc" : "#0b1220"};
+      color: inherit;
+      border: 1px solid ${borderColor};
+      border-radius: 10px;
+      padding: 12px 14px;
+      overflow-x: auto;
+      font-size: 13px;
+      line-height: 1.45;
+      page-break-inside: avoid;
+    }
+
+    code {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
+        "Liberation Mono", monospace;
+    }
+
+    /* -------- HEADINGS -------- */
+    h1, h2, h3 {
+      page-break-after: avoid;
+    }
+
+    /* -------- LISTS -------- */
+    ul, ol {
+      padding-left: 22px;
+    }
+
+    li {
+      margin: 4px 0;
+    }
+
+    /* -------- TABLES -------- */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 10px 0;
+    }
+
+    th, td {
+      border: 1px solid ${borderColor};
+      padding: 6px 8px;
+      text-align: left;
+    }
+
+    th {
+      background: ${theme === "light" ? "#eef2ff" : "#020617"};
+    }
+  </style>
+</head>
+
+<body>
+  <div class="pdf-root">
+    ${html}
+  </div>
+</body>
+</html>
+    `;
+
+    await page.setContent(documentHTML, {
       waitUntil: "networkidle0"
     });
 
+    /* -----------------------------------------------------
+       GENERATE PDF
+    ----------------------------------------------------- */
+
+    const pdfPath = path.join(process.cwd(), "output.pdf");
+
     await page.pdf({
-      path: "chat.pdf",
+      path: pdfPath,
       format: "A4",
       printBackground: true,
-      // 🔥 Sleeker margins
-      margin: {
-        top: "1mm",
-        bottom: "1mm",
-        left: "1mm",
-        right: "1mm"
-      },
-    
-      scale: 1,   // slightly tighter layout
-      displayHeaderFooter: false,
-
+      displayHeaderFooter: true,
       headerTemplate: `
         <div style="
-          font-size:10px;
+          font-size:9px;
           width:100%;
           text-align:center;
-          color:#64748b;
-          padding-top:1mm;">
-          ChatGPT Export • ${new Date().toLocaleDateString()}
+          color:${textColor};
+          padding-top:6px;
+        ">
         </div>
-      `,  
-
+      `,
       footerTemplate: `
         <div style="
-          font-size:10px;
+          font-size:9px;
           width:100%;
-          text-align:center;
-          color:#64748b;
-          padding-bottom:1mm;">
-           <span class="pageNumber"></span> of <span class="totalPages"></span>
+          display:flex;
+          justify-content:space-between;
+          padding:0 18mm;
+          color:${textColor};
+        ">
+          <span>Generated by ChatGPT → Perfect PDF</span>
+          <span>Page <span class="pageNumber"></span> / <span class="totalPages"></span></span>
         </div>
-      `,  
+      `,
+      margin: {
+        top: "30mm",
+        bottom: "26mm",
+        left: "18mm",
+        right: "18mm"
+      }
     });
 
     await browser.close();
 
-    res.json({ success: true });
+    res.json({
+      success: true,
+      message: "PDF generated successfully",
+      file: "output.pdf"
+    });
+
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ success: false });
+    console.error("PDF Export Error:", err);
+
+    if (browser) await browser.close();
+
+    res.status(500).json({
+      success: false,
+      error: "PDF generation failed"
+    });
   }
 });
 
-app.listen(3000, () => {
-  console.log("PDF Server running at http://localhost:3000");
+/* =========================================================
+   START SERVER
+========================================================= */
+
+app.listen(PORT, () => {
+  console.log(`📄 PDF server running at http://localhost:${PORT}`);
 });

@@ -1,6 +1,16 @@
 document.addEventListener("DOMContentLoaded", () => {
   const editor = document.getElementById("editor");
-  let previewHTML = document.getElementById("preview").innerHTML;
+  const preview = document.getElementById("preview");
+
+  let previewHTML = preview.innerHTML;
+  // ---------- DEBOUNCE UTILITY ----------
+  function debounce(fn, delay = 300) {
+    let timer;
+    return (...args) => {
+      clearTimeout(timer);
+      timer = setTimeout(() => fn(...args), delay);
+    };
+  }
 
   /* Convert double HR into page break */
   previewHTML = previewHTML.replace(
@@ -15,18 +25,26 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   // Live rendering
-  editor.addEventListener("input", render);
+  const saveMarkdown = debounce(() => {
+    chrome.storage.local.set({ markdown: editor.value });
+  }, 300);
+
+  editor.addEventListener("input", () => {
+    render();
+    saveMarkdown();
+  });
+
 
   function render() {
     marked.setOptions({
-      breaks: true,     // respects line breaks
+      breaks: true,
       gfm: true
     });
 
     preview.innerHTML = marked.parse(editor.value);
     enhanceCodeBlocks();
-
   }
+
   // Enhance code blocks with copy buttons
   function enhanceCodeBlocks() {
     const blocks = preview.querySelectorAll("pre");
@@ -36,7 +54,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
       const code = pre.querySelector("code");
       if (code) {
-        hljs.highlightElement(code);   // ⭐ Syntax highlight
+        hljs.highlightElement(code);
       }
 
       const wrapper = document.createElement("div");
@@ -56,34 +74,28 @@ document.addEventListener("DOMContentLoaded", () => {
       };
 
       header.appendChild(btn);
-
       pre.parentNode.insertBefore(wrapper, pre);
       wrapper.appendChild(header);
       wrapper.appendChild(pre);
     });
   }
 
-
-
   //============ Theme toggle logic =============//
   const themeBtn = document.getElementById("themeToggle");
   const themeIcon = document.getElementById("themeIcon");
   const hlTheme = document.getElementById("hlTheme");
 
-  const isLight = document.body.classList.contains("light");
-  if (isLight) {
-    hlTheme.href = "highlight-light.css";
-  } else {
-    hlTheme.href = "highlight-dark.css";
+  function applySyntaxTheme() {
+    const isLight = document.body.classList.contains("light");
+    hlTheme.href = isLight ? "highlight-light.css" : "highlight-dark.css";
   }
-  // Load saved theme
+
   chrome.storage.local.get("theme", (data) => {
     if (data.theme === "light") {
       document.body.classList.add("light");
       switchToSun();
-      document.getElementById("hlTheme").href = "highlight-light.css";
     }
-
+    applySyntaxTheme();
   });
 
   themeBtn.addEventListener("click", () => {
@@ -94,62 +106,71 @@ document.addEventListener("DOMContentLoaded", () => {
 
     if (isLight) switchToSun();
     else switchToMoon();
+
+    applySyntaxTheme();
   });
 
   function switchToSun() {
     themeIcon.innerHTML = `
-    <circle cx="12" cy="12" r="5" stroke="currentColor" stroke-width="2"/>
-    <line x1="12" y1="1" x2="12" y2="4" stroke="currentColor" stroke-width="2"/>
-    <line x1="12" y1="20" x2="12" y2="23" stroke="currentColor" stroke-width="2"/>
-  `;
+      <circle cx="12" cy="12" r="5" stroke="currentColor" stroke-width="2"/>
+      <line x1="12" y1="1" x2="12" y2="4" stroke="currentColor" stroke-width="2"/>
+      <line x1="12" y1="20" x2="12" y2="23" stroke="currentColor" stroke-width="2"/>
+    `;
   }
 
   function switchToMoon() {
     themeIcon.innerHTML = `
-    <path fill="currentColor"
-      d="M21 12.79A9 9 0 1111.21 3
-         7 7 0 0021 12.79z"/>
-  `;
+      <path fill="currentColor"
+        d="M21 12.79A9 9 0 1111.21 3
+           7 7 0 0021 12.79z"/>
+    `;
   }
 
-  //============ Font size adjustment =============//
+  //============ FONT SIZE SYSTEM (HEADINGS SCALE TOGETHER) =============//
+
   const fontPlus = document.getElementById("fontPlus");
   const fontMinus = document.getElementById("fontMinus");
-  const previewEl = document.getElementById("preview");
+  const root = document.documentElement;
 
-  let previewFontSize = 1.5;   // default (rem)
+  let baseFont = 1.5;   // rem
 
-  // Load saved size
   chrome.storage.local.get("previewFont", (data) => {
-    if (data.previewFont) {
-      previewFontSize = data.previewFont;
-      applyFontSize();
+    if (typeof data.previewFont === "number") {
+      baseFont = data.previewFont;
+      applyFontScale();
     }
   });
 
-  function applyFontSize() {
-    previewEl.style.fontSize = previewFontSize + "rem";
-    chrome.storage.local.set({ previewFont: previewFontSize });
+  function applyFontScale() {
+    root.style.setProperty("--preview-font", `${baseFont}rem`);
+
+    // Headings scale proportionally
+    root.style.setProperty("--h1-scale", `${baseFont * 1.25}rem`);
+    root.style.setProperty("--h2-scale", `${baseFont * 1.1}rem`);
+    root.style.setProperty("--h3-scale", `${baseFont * 1.0}rem`);
+
+    chrome.storage.local.set({ previewFont: baseFont });
   }
 
   fontPlus.onclick = () => {
-    previewFontSize += 0.1;
-    applyFontSize();
+    baseFont = Math.min(baseFont + 0.1, 3);
+    applyFontScale();
   };
 
   fontMinus.onclick = () => {
-    if (previewFontSize > 0.8) {
-      previewFontSize -= 0.1;
-      applyFontSize();
-    }
+    baseFont = Math.max(baseFont - 0.1, 0.9);
+    applyFontScale();
   };
 
+  applyFontScale();
 
-  // Download PDF logic
+  //============ DOWNLOAD PDF =============//
+
   const downloadBtn = document.getElementById("download");
 
   downloadBtn.onclick = async () => {
     const previewHTML = document.getElementById("preview").innerHTML;
+
     const styles = Array.from(document.styleSheets)
       .map(sheet => {
         try {
@@ -162,9 +183,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const payload = {
       html: `
-      <style>${styles}</style>
-      <div class="pdf-root">${previewHTML}</div>
-    `,
+        <style>${styles}</style>
+        <div class="pdf-root">${previewHTML}</div>
+      `,
       theme: document.body.classList.contains("light") ? "light" : "dark"
     };
 
@@ -181,11 +202,24 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   };
 
-
-  // ---------- RESIZE PANELS ----------
+  //============ RESIZE PANELS =============//
 
   const resizer = document.getElementById("resizer");
   const main = document.querySelector("main");
+  // ---------- RESTORE PANEL SIZE ----------
+
+  chrome.storage.local.get("editorWidth", (data) => {
+    if (!main || !data.editorWidth) return;
+
+    const rect = main.getBoundingClientRect();
+    const min = 180;
+    const max = rect.width - 180;
+
+    let width = data.editorWidth;
+    width = Math.max(min, Math.min(width, max));
+
+    main.style.gridTemplateColumns = `${width}px 8px auto`;
+  });
 
   if (resizer && main) {
     let isDragging = false;
@@ -193,6 +227,7 @@ document.addEventListener("DOMContentLoaded", () => {
     resizer.addEventListener("mousedown", (e) => {
       isDragging = true;
       document.body.style.cursor = "col-resize";
+      document.body.style.userSelect = "none";
       e.preventDefault();
     });
 
@@ -201,22 +236,32 @@ document.addEventListener("DOMContentLoaded", () => {
 
       const rect = main.getBoundingClientRect();
       const offsetX = e.clientX - rect.left;
-      const min = 150;
-      const max = rect.width - 150;
+      const min = 180;
+      const max = rect.width - 180;
 
       if (offsetX < min || offsetX > max) return;
 
-      main.style.gridTemplateColumns = `${offsetX}px 6px auto`;
+      main.style.gridTemplateColumns = `${offsetX}px 8px auto`;
     });
 
     window.addEventListener("mouseup", () => {
+      if (!isDragging) return;
+
       isDragging = false;
       document.body.style.cursor = "default";
+      document.body.style.userSelect = "auto";
+
+      const grid = main.style.gridTemplateColumns;
+      const editorWidth = parseInt(grid.split("px")[0], 10);
+
+      if (!isNaN(editorWidth)) {
+        chrome.storage.local.set({ editorWidth });
+      }
     });
-  } else {
-    console.warn("Resizer not found — resize disabled.");
+
   }
-  // ---------- SCROLL SHADOW HANDLING ----------
+
+  //============ SCROLL SHADOW HANDLING =============//
 
   function setupScrollShadows(wrapper, scrollEl) {
     function update() {
@@ -235,10 +280,44 @@ document.addEventListener("DOMContentLoaded", () => {
 
   const editorWrap = document.getElementById("editorWrap");
   const previewWrap = document.getElementById("previewWrap");
-  // const editor = document.getElementById("editor");
-  // const preview = document.getElementById("preview");
 
   if (editorWrap && editor) setupScrollShadows(editorWrap, editor);
   if (previewWrap && preview) setupScrollShadows(previewWrap, preview);
+
+
+  // ============ SCROLL SYNC (EDITOR ↔ PREVIEW) ============ //
+
+  let isSyncingScroll = false;
+
+  function syncScroll(source, target) {
+    if (isSyncingScroll) return;
+
+    const sourceScrollTop = source.scrollTop;
+    const sourceScrollable =
+      source.scrollHeight - source.clientHeight;
+
+    const targetScrollable =
+      target.scrollHeight - target.clientHeight;
+
+    if (sourceScrollable <= 0 || targetScrollable <= 0) return;
+
+    const scrollRatio = sourceScrollTop / sourceScrollable;
+
+    isSyncingScroll = true;
+    target.scrollTop = scrollRatio * targetScrollable;
+
+    // release lock on next frame
+    requestAnimationFrame(() => {
+      isSyncingScroll = false;
+    });
+  }
+
+  editor.addEventListener("scroll", () => {
+    syncScroll(editor, preview);
+  });
+
+  preview.addEventListener("scroll", () => {
+    syncScroll(preview, editor);
+  });
 
 });
