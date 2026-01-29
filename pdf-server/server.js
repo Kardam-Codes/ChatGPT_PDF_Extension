@@ -50,7 +50,8 @@ app.post("/export", async (req, res) => {
   <style>
     @page {
       size: A4;
-      margin: 22mm 18mm 24mm 18mm;
+      // margin: 2.2mm 1.8mm 2.4mm 1.8mm;
+      margin: 0;
     }
 
     body {

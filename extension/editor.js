@@ -1,9 +1,22 @@
 document.addEventListener("DOMContentLoaded", () => {
   const editor = document.getElementById("editor");
   const preview = document.getElementById("preview");
+  const emptyState = document.getElementById("emptyState");
 
-  let previewHTML = preview.innerHTML;
-  // ---------- DEBOUNCE UTILITY ----------
+  /* =========================================================
+     EMPTY STATE
+  ========================================================= */
+
+  function updateEmptyState() {
+    if (!emptyState) return;
+    const empty = editor.value.trim().length === 0;
+    emptyState.classList.toggle("visible", empty);
+  }
+
+  /* =========================================================
+     DEBOUNCE UTILITY
+  ========================================================= */
+
   function debounce(fn, delay = 300) {
     let timer;
     return (...args) => {
@@ -12,19 +25,16 @@ document.addEventListener("DOMContentLoaded", () => {
     };
   }
 
-  /* Convert double HR into page break */
-  previewHTML = previewHTML.replace(
-    /<hr>\s*<hr>/g,
-    '<div class="page-break"></div>'
-  );
+  /* =========================================================
+     LOAD SAVED MARKDOWN
+  ========================================================= */
 
-  // Load pasted content
   chrome.storage.local.get("markdown", (data) => {
     editor.value = data.markdown || "";
     render();
+    updateEmptyState();
   });
 
-  // Live rendering
   const saveMarkdown = debounce(() => {
     chrome.storage.local.set({ markdown: editor.value });
   }, 300);
@@ -32,8 +42,12 @@ document.addEventListener("DOMContentLoaded", () => {
   editor.addEventListener("input", () => {
     render();
     saveMarkdown();
+    updateEmptyState();
   });
 
+  /* =========================================================
+     MARKDOWN RENDER
+  ========================================================= */
 
   function render() {
     marked.setOptions({
@@ -41,11 +55,22 @@ document.addEventListener("DOMContentLoaded", () => {
       gfm: true
     });
 
-    preview.innerHTML = marked.parse(editor.value);
+    let html = marked.parse(editor.value);
+
+    // Convert double HR to page break
+    html = html.replace(
+      /<hr>\s*<hr>/g,
+      '<div class="page-break"></div>'
+    );
+
+    preview.innerHTML = html;
     enhanceCodeBlocks();
   }
 
-  // Enhance code blocks with copy buttons
+  /* =========================================================
+     CODE BLOCK ENHANCEMENT
+  ========================================================= */
+
   function enhanceCodeBlocks() {
     const blocks = preview.querySelectorAll("pre");
 
@@ -80,7 +105,10 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  //============ Theme toggle logic =============//
+  /* =========================================================
+     THEME TOGGLE
+  ========================================================= */
+
   const themeBtn = document.getElementById("themeToggle");
   const themeIcon = document.getElementById("themeIcon");
   const hlTheme = document.getElementById("hlTheme");
@@ -104,9 +132,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const isLight = document.body.classList.contains("light");
     chrome.storage.local.set({ theme: isLight ? "light" : "dark" });
 
-    if (isLight) switchToSun();
-    else switchToMoon();
-
+    isLight ? switchToSun() : switchToMoon();
     applySyntaxTheme();
   });
 
@@ -126,13 +152,15 @@ document.addEventListener("DOMContentLoaded", () => {
     `;
   }
 
-  //============ FONT SIZE SYSTEM (HEADINGS SCALE TOGETHER) =============//
+  /* =========================================================
+     FONT SIZE SYSTEM
+  ========================================================= */
 
   const fontPlus = document.getElementById("fontPlus");
   const fontMinus = document.getElementById("fontMinus");
   const root = document.documentElement;
 
-  let baseFont = 1.5;   // rem
+  let baseFont = 1.5;
 
   chrome.storage.local.get("previewFont", (data) => {
     if (typeof data.previewFont === "number") {
@@ -143,12 +171,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function applyFontScale() {
     root.style.setProperty("--preview-font", `${baseFont}rem`);
-
-    // Headings scale proportionally
     root.style.setProperty("--h1-scale", `${baseFont * 1.25}rem`);
     root.style.setProperty("--h2-scale", `${baseFont * 1.1}rem`);
     root.style.setProperty("--h3-scale", `${baseFont * 1.0}rem`);
-
     chrome.storage.local.set({ previewFont: baseFont });
   }
 
@@ -164,13 +189,13 @@ document.addEventListener("DOMContentLoaded", () => {
 
   applyFontScale();
 
-  //============ DOWNLOAD PDF =============//
+  /* =========================================================
+     DOWNLOAD PDF
+  ========================================================= */
 
   const downloadBtn = document.getElementById("download");
 
   downloadBtn.onclick = async () => {
-    const previewHTML = document.getElementById("preview").innerHTML;
-
     const styles = Array.from(document.styleSheets)
       .map(sheet => {
         try {
@@ -182,10 +207,7 @@ document.addEventListener("DOMContentLoaded", () => {
       .join("");
 
     const payload = {
-      html: `
-        <style>${styles}</style>
-        <div class="pdf-root">${previewHTML}</div>
-      `,
+      html: `<style>${styles}</style><div class="pdf-root">${preview.innerHTML}</div>`,
       theme: document.body.classList.contains("light") ? "light" : "dark"
     };
 
@@ -195,29 +217,24 @@ document.addEventListener("DOMContentLoaded", () => {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload)
       });
-
       alert("PDF generated successfully!");
-    } catch (err) {
+    } catch {
       alert("PDF export failed. Is server running?");
     }
   };
 
-  //============ RESIZE PANELS =============//
+  /* =========================================================
+     PANEL RESIZE + PERSISTENCE
+  ========================================================= */
 
   const resizer = document.getElementById("resizer");
   const main = document.querySelector("main");
-  // ---------- RESTORE PANEL SIZE ----------
 
   chrome.storage.local.get("editorWidth", (data) => {
     if (!main || !data.editorWidth) return;
 
     const rect = main.getBoundingClientRect();
-    const min = 180;
-    const max = rect.width - 180;
-
-    let width = data.editorWidth;
-    width = Math.max(min, Math.min(width, max));
-
+    const width = Math.max(180, Math.min(data.editorWidth, rect.width - 180));
     main.style.gridTemplateColumns = `${width}px 8px auto`;
   });
 
@@ -233,91 +250,44 @@ document.addEventListener("DOMContentLoaded", () => {
 
     window.addEventListener("mousemove", (e) => {
       if (!isDragging) return;
-
       const rect = main.getBoundingClientRect();
-      const offsetX = e.clientX - rect.left;
-      const min = 180;
-      const max = rect.width - 180;
-
-      if (offsetX < min || offsetX > max) return;
-
-      main.style.gridTemplateColumns = `${offsetX}px 8px auto`;
+      const x = e.clientX - rect.left;
+      if (x < 180 || x > rect.width - 180) return;
+      main.style.gridTemplateColumns = `${x}px 8px auto`;
     });
 
     window.addEventListener("mouseup", () => {
       if (!isDragging) return;
-
       isDragging = false;
       document.body.style.cursor = "default";
       document.body.style.userSelect = "auto";
 
-      const grid = main.style.gridTemplateColumns;
-      const editorWidth = parseInt(grid.split("px")[0], 10);
-
-      if (!isNaN(editorWidth)) {
-        chrome.storage.local.set({ editorWidth });
-      }
+      const width = parseInt(main.style.gridTemplateColumns, 10);
+      if (!isNaN(width)) chrome.storage.local.set({ editorWidth: width });
     });
-
   }
 
-  //============ SCROLL SHADOW HANDLING =============//
-
-  function setupScrollShadows(wrapper, scrollEl) {
-    function update() {
-      const { scrollTop, scrollHeight, clientHeight } = scrollEl;
-
-      wrapper.classList.toggle("scrolled-top", scrollTop > 4);
-      wrapper.classList.toggle(
-        "scrolled-bottom",
-        scrollTop + clientHeight < scrollHeight - 4
-      );
-    }
-
-    scrollEl.addEventListener("scroll", update);
-    update();
-  }
-
-  const editorWrap = document.getElementById("editorWrap");
-  const previewWrap = document.getElementById("previewWrap");
-
-  if (editorWrap && editor) setupScrollShadows(editorWrap, editor);
-  if (previewWrap && preview) setupScrollShadows(previewWrap, preview);
-
-
-  // ============ SCROLL SYNC (EDITOR ↔ PREVIEW) ============ //
+  /* =========================================================
+     SCROLL SYNC
+  ========================================================= */
 
   let isSyncingScroll = false;
 
   function syncScroll(source, target) {
     if (isSyncingScroll) return;
 
-    const sourceScrollTop = source.scrollTop;
-    const sourceScrollable =
-      source.scrollHeight - source.clientHeight;
-
-    const targetScrollable =
-      target.scrollHeight - target.clientHeight;
-
-    if (sourceScrollable <= 0 || targetScrollable <= 0) return;
-
-    const scrollRatio = sourceScrollTop / sourceScrollable;
+    const ratio =
+      source.scrollTop /
+      (source.scrollHeight - source.clientHeight || 1);
 
     isSyncingScroll = true;
-    target.scrollTop = scrollRatio * targetScrollable;
+    target.scrollTop =
+      ratio * (target.scrollHeight - target.clientHeight);
 
-    // release lock on next frame
-    requestAnimationFrame(() => {
-      isSyncingScroll = false;
-    });
+    requestAnimationFrame(() => (isSyncingScroll = false));
   }
 
-  editor.addEventListener("scroll", () => {
-    syncScroll(editor, preview);
-  });
-
-  preview.addEventListener("scroll", () => {
-    syncScroll(preview, editor);
-  });
+  editor.addEventListener("scroll", () => syncScroll(editor, preview));
+  preview.addEventListener("scroll", () => syncScroll(preview, editor));
 
 });

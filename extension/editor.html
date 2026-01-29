@@ -2,76 +2,88 @@
 <html lang="en">
 
 <head>
-    <meta charset="UTF-8" />
-    <title>ChatGPT → Perfect PDF</title>
+  <meta charset="UTF-8" />
+  <title>ChatGPT → Perfect PDF</title>
 
-    <!-- Responsive safety -->
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <!-- Responsive safety -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-    <!-- Styles -->
-    <link rel="stylesheet" href="editor.css" />
-    <link id="hlTheme" rel="stylesheet" href="highlight-dark.css" />
+  <!-- Styles -->
+  <link rel="stylesheet" href="editor.css" />
+  <link id="hlTheme" rel="stylesheet" href="highlight-dark.css" />
 </head>
 
 <body>
 
-    <!-- ================= NAVBAR ================= -->
-    <nav>
-        <div class="nav-title">
-            ChatGPT &#10132; Perfect PDF
-        </div>
+  <!-- ================= NAVBAR ================= -->
+  <nav>
+    <div class="nav-title">
+      ChatGPT &#10132; Perfect PDF
+    </div>
 
-        <div class="nav-actions">
-            <!-- Font size controls -->
-            <button id="fontMinus" class="icon-btn" title="Decrease font size">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
-                    <path d="M5 12h14" stroke="currentColor" stroke-width="2" />
-                </svg>
-            </button>
+    <div class="nav-actions">
+      <!-- Font size controls -->
+      <button id="fontMinus" class="icon-btn" title="Decrease font size">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+          <path d="M5 12h14" stroke="currentColor" stroke-width="2" />
+        </svg>
+      </button>
 
-            <button id="fontPlus" class="icon-btn" title="Increase font size">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
-                    <path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2" />
-                </svg>
-            </button>
+      <button id="fontPlus" class="icon-btn" title="Increase font size">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+          <path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2" />
+        </svg>
+      </button>
 
-
-            <!-- Theme toggle -->
-            <button id="themeToggle" class="icon-btn" title="Toggle theme" aria-label="Toggle theme">
-                <svg id="themeIcon" width="18" height="18" viewBox="0 0 24 24" fill="none">
-                    <path fill="currentColor" d="M21 12.79A9 9 0 1111.21 3
+      <!-- Theme toggle -->
+      <button id="themeToggle" class="icon-btn" title="Toggle theme" aria-label="Toggle theme">
+        <svg id="themeIcon" width="18" height="18" viewBox="0 0 24 24" fill="none">
+          <path fill="currentColor"
+            d="M21 12.79A9 9 0 1111.21 3
                7 7 0 0021 12.79z" />
-                </svg>
-            </button>
+        </svg>
+      </button>
 
-            <!-- Download -->
-            <button id="download" class="icon-btn download-btn" title="Download PDF" aria-label="Download PDF">
-                <!-- Solid download arrow -->
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
-                    <path fill="currentColor" d="M12 3v12m0 0l4-4m-4 4l-4-4M5 21h14" />
-                </svg>
-            </button>
+      <!-- Download -->
+      <button id="download" class="icon-btn download-btn" title="Download PDF" aria-label="Download PDF">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+          <path fill="currentColor"
+            d="M12 3v12m0 0l4-4m-4 4l-4-4M5 21h14" />
+        </svg>
+      </button>
+    </div>
+  </nav>
+
+  <!-- ================= MAIN ================= -->
+  <main>
+    <!-- Editor -->
+    <div id="editorWrap" class="scroll-wrapper">
+      <textarea id="editor" placeholder="Paste ChatGPT response here..."></textarea>
+    </div>
+
+    <!-- Resizer -->
+    <div id="resizer"></div>
+
+    <!-- Preview -->
+    <div id="previewWrap" class="scroll-wrapper">
+      <div id="preview"></div>
+
+      <!-- Empty State -->
+      <div id="emptyState">
+        <div class="empty-inner">
+          <h2>ChatGPT → Perfect PDF</h2>
+          <p>Paste your ChatGPT response on the left.</p>
+          <p>Edit it, preview it, then export a clean PDF.</p>
+          <span>Nothing is uploaded. Everything stays local.</span>
         </div>
-    </nav>
+      </div>
+    </div>
+  </main>
 
-    <!-- ================= MAIN ================= -->
-    <main>
-        <div class="scroll-wrapper" id="editorWrap">
-            <textarea id="editor" placeholder="Paste or type your content here..."></textarea>
-        </div>
-
-        <div id="resizer"></div>
-
-        <div class="scroll-wrapper" id="previewWrap">
-            <div id="preview"></div>
-        </div>
-    </main>
-
-    <!-- ================= SCRIPTS ================= -->
-    <script src="marked.min.js"></script>
-    <script src="highlight.min.js"></script>
-    <script src="editor.js"></script>
+  <!-- ================= SCRIPTS ================= -->
+  <script src="marked.min.js"></script>
+  <script src="highlight.min.js"></script>
+  <script src="editor.js"></script>
 
 </body>
-
 </html>
