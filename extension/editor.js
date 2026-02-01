@@ -306,3 +306,15 @@ function showToast(message, type = "success") {
   setTimeout(() => toast.remove(), 2500);
 }
 
+const editor = document.getElementById("editor");
+const emptyState = document.getElementById("emptyState");
+
+function updateEmptyState() {
+  const isEmpty = editor.value.trim() === "";
+  emptyState.classList.toggle("visible", isEmpty);
+}
+
+editor.addEventListener("input", updateEmptyState);
+updateEmptyState();
+
+
