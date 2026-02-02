@@ -55,7 +55,14 @@ document.addEventListener("DOMContentLoaded", () => {
       gfm: true
     });
 
-    let html = marked.parse(editor.value);
+    let html = "";
+
+    try {
+      html = marked.parse(editor.value);
+    } catch {
+      showToast("Preview render failed", "error");
+    }
+
 
     // Convert double HR to page break
     html = html.replace(
@@ -196,6 +203,13 @@ document.addEventListener("DOMContentLoaded", () => {
   const downloadBtn = document.getElementById("download");
 
   downloadBtn.onclick = async () => {
+
+    //prevent empty export
+  if (!editor.value.trim()) {
+    showToast("Paste something first!", "error");
+    return;
+  }
+
     const styles = Array.from(document.styleSheets)
       .map(sheet => {
         try {
