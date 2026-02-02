@@ -419,3 +419,11 @@ body.light #preview::-webkit-scrollbar-thumb:hover {
 .toast.error   { background: #dc2626; }
 .toast.info    { background: #2563eb; }
 
+button {
+  cursor: pointer;
+}
+
+button:hover {
+  opacity: 0.9;
+}
+
