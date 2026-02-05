@@ -26,6 +26,19 @@ All **offline, private, and local**.
 
 ---
 
+## ⚡ Quick Start
+
+Start the server:
+cd pdf-server
+npm install
+node server.js
+
+Load the extension:
+chrome://extensions → Developer Mode → Load unpacked → select extension/
+
+Open the extension → paste content → preview → Download PDF
+
+
 ## 🚀 Features
 
 ### 📝 Editor + Live Preview
@@ -36,8 +49,12 @@ All **offline, private, and local**.
 
 ### 🎨 Theme & Typography Control
 
-* Dark / Light mode
-* Adjustable font size (headings scale proportionally)
+## 🎨 Theme & Font Controls
+
+* Toggle Light/Dark mode from the toolbar
+* Use + / − buttons to adjust preview font size
+* Headings scale proportionally for clean typography
+* PDF export uses the same styling as preview
 * Code blocks remain untouched for clarity
 
 ### 💻 Code Blocks (ChatGPT‑style)
@@ -160,12 +177,30 @@ You should see:
 ## 🧪 Usage
 
 1. Open the extension
-2. Paste a ChatGPT response
-3. Adjust font size / theme if needed
-4. Use `--- ---` for page breaks
+2. Paste your ChatGPT content into the editor
+3. Preview updates automatically
+4. Adjust theme or font size if needed
 5. Click **Download PDF**
 
+### Tips
+
+* Use `--- ---` to create page breaks
+* Code blocks keep syntax highlighting automatically
+* Everything runs locally (no uploads)
+
 ---
+
+## 🧯 Troubleshooting
+
+PDF not generating?
+- Make sure the server is running on http://localhost:3000
+
+Preview not updating?
+- Reload the extension
+
+Extension not loading?
+- Ensure Developer Mode is enabled in chrome://extensions
+
 
 ## 🧠 Design Principles
 

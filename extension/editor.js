@@ -55,7 +55,14 @@ document.addEventListener("DOMContentLoaded", () => {
       gfm: true
     });
 
-    let html = marked.parse(editor.value);
+    let html = "";
+
+    try {
+      html = marked.parse(editor.value);
+    } catch {
+      showToast("Preview render failed", "error");
+    }
+
 
     // Convert double HR to page break
     html = html.replace(
@@ -196,6 +203,13 @@ document.addEventListener("DOMContentLoaded", () => {
   const downloadBtn = document.getElementById("download");
 
   downloadBtn.onclick = async () => {
+
+    //prevent empty export
+  if (!editor.value.trim()) {
+    showToast("Paste something first!", "error");
+    return;
+  }
+
     const styles = Array.from(document.styleSheets)
       .map(sheet => {
         try {
@@ -217,9 +231,9 @@ document.addEventListener("DOMContentLoaded", () => {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload)
       });
-      alert("PDF generated successfully!");
+      showToast("PDF generated successfully!");
     } catch {
-      alert("PDF export failed. Is server running?");
+      showToast("PDF export failed. Is server running?");
     }
   };
 
@@ -291,3 +305,30 @@ document.addEventListener("DOMContentLoaded", () => {
   preview.addEventListener("scroll", () => syncScroll(preview, editor));
 
 });
+
+function showToast(message, type = "success") {
+  const container = document.getElementById("toastContainer");
+
+  const toast = document.createElement("div");
+  toast.className = `toast ${type}`;
+  toast.textContent = message;
+
+  container.appendChild(toast);
+
+  requestAnimationFrame(() => toast.classList.add("show"));
+
+  setTimeout(() => toast.remove(), 2500);
+}
+
+const editor = document.getElementById("editor");
+const emptyState = document.getElementById("emptyState");
+
+function updateEmptyState() {
+  const isEmpty = editor.value.trim() === "";
+  emptyState.classList.toggle("visible", isEmpty);
+}
+
+editor.addEventListener("input", updateEmptyState);
+updateEmptyState();
+
+
