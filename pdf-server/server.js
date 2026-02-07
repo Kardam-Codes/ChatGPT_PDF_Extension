@@ -9,6 +9,18 @@ app.use(cors());
 app.use(express.json({ limit: "50mb" }));
 
 /* =========================================================
+   HEALTH CHECK
+========================================================= */
+
+app.get("/", (req, res) => {
+  res.json({
+    status: "ok",
+    service: "md-to-perfect-pdf",
+    message: "Use POST /export to generate PDFs"
+  });
+});
+
+/* =========================================================
    PDF EXPORT ENDPOINT
 ========================================================= */
 
