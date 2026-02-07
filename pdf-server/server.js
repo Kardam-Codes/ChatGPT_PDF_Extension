@@ -58,8 +58,11 @@ app.post("/export", async (req, res) => {
 
   let browser;
   try {
+    const executablePath = puppeteer.executablePath();
+
     browser = await puppeteer.launch({
       headless: "new",
+      executablePath,
       args: [
         "--no-sandbox",
         "--disable-setuid-sandbox",
