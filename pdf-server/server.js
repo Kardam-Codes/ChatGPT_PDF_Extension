@@ -248,13 +248,13 @@ app.post("/export", async (req, res) => {
     res.send(pdfBuffer);
 
   } catch (err) {
-    console.error("PDF Export Error:", err);
+    console.error("PDF Export Error:", err?.stack || err);
 
     if (browser) await browser.close();
 
     res.status(500).json({
       success: false,
-      error: "PDF generation failed"
+      error: err?.message || "PDF generation failed"
     });
   }
 });
