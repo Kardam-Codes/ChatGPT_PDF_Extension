@@ -59,7 +59,11 @@ app.post("/export", async (req, res) => {
   let browser;
   try {
     const executablePath =
-      process.env.PUPPETEER_EXECUTABLE_PATH || puppeteer.executablePath();
+      process.env.PUPPETEER_EXECUTABLE_PATH ||
+      puppeteer.executablePath() ||
+      "/opt/render/.cache/puppeteer/chrome/linux-144.0.7559.96/chrome-linux64/chrome";
+
+    console.log("Using Chrome executable:", executablePath);
 
     browser = await puppeteer.launch({
       headless: "new",
