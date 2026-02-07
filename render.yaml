@@ -4,8 +4,8 @@ services:
     env: node
     rootDir: pdf-server
     plan: free
-    buildCommand: npm install
+    buildCommand: npm install && npx puppeteer browsers install chrome
     startCommand: npm run start
     envVars:
-      - key: PUPPETEER_SKIP_DOWNLOAD
-        value: "true"
+      - key: PUPPETEER_CACHE_DIR
+        value: "/opt/render/.cache/puppeteer"
