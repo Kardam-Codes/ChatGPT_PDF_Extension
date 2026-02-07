@@ -197,8 +197,10 @@ app.post("/export", async (req, res) => {
 </html>
     `;
 
+    page.setDefaultNavigationTimeout(15000);
     await page.setContent(documentHTML, {
-      waitUntil: "networkidle0"
+      waitUntil: "domcontentloaded",
+      timeout: 15000
     });
 
     /* -----------------------------------------------------
