@@ -58,7 +58,8 @@ app.post("/export", async (req, res) => {
 
   let browser;
   try {
-    const executablePath = process.env.PUPPETEER_EXECUTABLE_PATH || undefined;
+    const executablePath =
+      process.env.PUPPETEER_EXECUTABLE_PATH || puppeteer.executablePath();
 
     browser = await puppeteer.launch({
       headless: "new",
