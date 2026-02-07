@@ -1,0 +1,11 @@
+services:
+  - type: web
+    name: md-to-perfect-pdf
+    env: node
+    rootDir: pdf-server
+    plan: free
+    buildCommand: npm install
+    startCommand: npm run start
+    envVars:
+      - key: PUPPETEER_SKIP_DOWNLOAD
+        value: "true"

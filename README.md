@@ -1,6 +1,6 @@
-# ChatGPT → Perfect PDF
+# MD → Perfect PDF
 
-Turn ChatGPT responses into **clean, beautiful, print‑ready PDFs** — with full control over layout, typography, and theme.
+Turn Markdown into **clean, beautiful, print‑ready PDFs** — with full control over layout, typography, and theme.
 
 This project is a **local-first Chrome Extension + PDF server** designed for people who care about *readability*, *formatting*, and *professional output*.
 
@@ -8,7 +8,7 @@ This project is a **local-first Chrome Extension + PDF server** designed for peo
 
 ## ✨ Why This Exists
 
-Copy‑pasting ChatGPT content into Word / Google Docs usually breaks:
+Copy‑pasting Markdown into Word / Google Docs usually breaks:
 
 * Code blocks ❌
 * Headings ❌
@@ -16,10 +16,10 @@ Copy‑pasting ChatGPT content into Word / Google Docs usually breaks:
 * Page breaks ❌
 * Dark/light theme consistency ❌
 
-**ChatGPT → Perfect PDF** solves this by giving you:
+**MD → Perfect PDF** solves this by giving you:
 
 * A live Markdown editor
-* A ChatGPT‑like preview
+* A Markdown‑first preview
 * Pixel‑perfect PDF export
 
 All **offline, private, and local**.
@@ -38,12 +38,28 @@ chrome://extensions → Developer Mode → Load unpacked → select extension/
 
 Open the extension → paste content → preview → Download PDF
 
+---
+
+## 🚀 Deploy PDF Server on Render (Free Tier)
+
+1. Push this repo to GitHub.
+2. Create a new **Web Service** on Render.
+3. Use these settings:
+   - **Root Directory:** `pdf-server`
+   - **Build Command:** `npm install`
+   - **Start Command:** `npm run start`
+4. Add environment variable:
+   - `PUPPETEER_SKIP_DOWNLOAD=true`
+5. Deploy and copy the service URL (e.g. `https://your-app.onrender.com`).
+
+You will use that URL in the extension’s `host_permissions` and fetch calls.
+
 
 ## 🚀 Features
 
 ### 📝 Editor + Live Preview
 
-* Paste ChatGPT responses directly
+* Paste Markdown directly
 * Edit Markdown freely
 * Instant preview with accurate formatting
 
@@ -57,7 +73,7 @@ Open the extension → paste content → preview → Download PDF
 * PDF export uses the same styling as preview
 * Code blocks remain untouched for clarity
 
-### 💻 Code Blocks (ChatGPT‑style)
+### 💻 Code Blocks (Markdown‑style)
 
 * Syntax highlighting (dark & light)
 * Copy‑code button
@@ -108,7 +124,7 @@ ChatGPT_PDF_Extension/
 
 ### 1️⃣ Chrome Extension (Frontend)
 
-* Accepts pasted ChatGPT content
+* Accepts pasted Markdown content
 * Renders Markdown using `marked`
 * Enhances code blocks with `highlight.js`
 * Sends rendered HTML to the PDF server
@@ -177,7 +193,7 @@ You should see:
 ## 🧪 Usage
 
 1. Open the extension
-2. Paste your ChatGPT content into the editor
+2. Paste your Markdown into the editor
 3. Preview updates automatically
 4. Adjust theme or font size if needed
 5. Click **Download PDF**
@@ -228,7 +244,7 @@ Extension not loading?
 
 ### Phase D — Power Features
 
-* ChatGPT auto‑capture
+* Markdown auto‑capture
 * Section navigation
 * Multi‑document export
 

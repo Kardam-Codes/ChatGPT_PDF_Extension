@@ -201,15 +201,107 @@ document.addEventListener("DOMContentLoaded", () => {
   ========================================================= */
 
   const downloadBtn = document.getElementById("download");
+  const exportModal = document.getElementById("exportModal");
+  const exportClose = document.getElementById("exportClose");
+  const exportCancel = document.getElementById("exportCancel");
+  const exportConfirm = document.getElementById("exportConfirm");
+  const exportBackdrop = exportModal?.querySelector(".modal-backdrop");
 
-  downloadBtn.onclick = async () => {
-
-    //prevent empty export
-  if (!editor.value.trim()) {
-    showToast("Paste something first!", "error");
-    return;
+  function openModal() {
+    if (!exportModal) return;
+    exportModal.classList.add("open");
+    exportModal.setAttribute("aria-hidden", "false");
+    chrome.storage.local.get("exportOptions", (data) => {
+      if (data?.exportOptions) applySettings(data.exportOptions);
+    });
   }
 
+  function closeModal() {
+    if (!exportModal) return;
+    exportModal.classList.remove("open");
+    exportModal.classList.remove("exporting");
+    exportModal.setAttribute("aria-hidden", "true");
+  }
+
+  function getSelectedValue(name) {
+    const input = document.querySelector(`input[name="${name}"]:checked`);
+    return input ? input.value : null;
+  }
+
+  function collectOptions() {
+    const themeChoice = getSelectedValue("theme");
+    const matchTheme = document.body.classList.contains("light") ? "light" : "dark";
+
+    return {
+      pageSize: getSelectedValue("pageSize") || "A4",
+      orientation: getSelectedValue("orientation") || "portrait",
+      margin: document.getElementById("margin")?.value || "normal",
+      theme: themeChoice === "match" ? matchTheme : (themeChoice || matchTheme),
+      font: document.getElementById("fontFamily")?.value || "Inter",
+      header: document.getElementById("includeTitle")?.checked || false,
+      footer: document.getElementById("includePageNumbers")?.checked || false,
+      includeDateTime: document.getElementById("includeDateTime")?.checked || false,
+      pageBreaks: document.getElementById("pageBreaks")?.value || "auto",
+      fileName: document.getElementById("fileName")?.value || "chatgpt-export.pdf",
+      autoOpen: document.getElementById("autoOpen")?.checked || false,
+      copyPath: document.getElementById("copyPath")?.checked || false,
+      rememberSettings: document.getElementById("rememberSettings")?.checked || false
+    };
+  }
+
+  function applySettings(options) {
+    if (!options) return;
+    const setRadio = (name, value) => {
+      const input = document.querySelector(`input[name="${name}"][value="${value}"]`);
+      if (input) input.checked = true;
+    };
+
+    setRadio("pageSize", options.pageSize || "A4");
+    setRadio("orientation", options.orientation || "portrait");
+    setRadio("theme", options.theme === "light" || options.theme === "dark" ? options.theme : "match");
+
+    const margin = document.getElementById("margin");
+    if (margin && options.margin) margin.value = options.margin;
+
+    const font = document.getElementById("fontFamily");
+    if (font && options.font) font.value = options.font;
+
+    const includeTitle = document.getElementById("includeTitle");
+    if (includeTitle && typeof options.header === "boolean") includeTitle.checked = options.header;
+
+    const includePageNumbers = document.getElementById("includePageNumbers");
+    if (includePageNumbers && typeof options.footer === "boolean") includePageNumbers.checked = options.footer;
+
+    const includeDateTime = document.getElementById("includeDateTime");
+    if (includeDateTime && typeof options.includeDateTime === "boolean") includeDateTime.checked = options.includeDateTime;
+
+    const pageBreaks = document.getElementById("pageBreaks");
+    if (pageBreaks && options.pageBreaks) pageBreaks.value = options.pageBreaks;
+
+    const fileName = document.getElementById("fileName");
+    if (fileName && options.fileName) fileName.value = options.fileName;
+
+    const autoOpen = document.getElementById("autoOpen");
+    if (autoOpen && typeof options.autoOpen === "boolean") autoOpen.checked = options.autoOpen;
+
+    const copyPath = document.getElementById("copyPath");
+    if (copyPath && typeof options.copyPath === "boolean") copyPath.checked = options.copyPath;
+
+    const remember = document.getElementById("rememberSettings");
+    if (remember && typeof options.rememberSettings === "boolean") remember.checked = options.rememberSettings;
+  }
+
+  function persistSettings(options) {
+    if (!options?.rememberSettings) return;
+    chrome.storage.local.set({ exportOptions: options });
+  }
+
+  function setExporting(isExporting) {
+    if (!exportModal) return;
+    exportModal.classList.toggle("exporting", isExporting);
+  }
+
+  async function doExport() {
     const styles = Array.from(document.styleSheets)
       .map(sheet => {
         try {
@@ -220,22 +312,81 @@ document.addEventListener("DOMContentLoaded", () => {
       })
       .join("");
 
+    const options = collectOptions();
+    persistSettings(options);
+
     const payload = {
       html: `<style>${styles}</style><div class="pdf-root">${preview.innerHTML}</div>`,
-      theme: document.body.classList.contains("light") ? "light" : "dark"
+      options
     };
 
+    const progressToast = showToast("Generating PDF...", "info", {
+      autoDismissMs: false,
+      loaderDurationMs: 2500
+    });
+
+    setExporting(true);
+
     try {
-      await fetch("http://localhost:3000/export", {
+      const response = await fetch("http://localhost:3000/export", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload)
       });
-      showToast("PDF generated successfully!");
-    } catch {
-      showToast("PDF export failed. Is server running?");
+      const contentType = response.headers.get("content-type") || "";
+      if (!response.ok || !contentType.includes("application/pdf")) {
+        let errorMessage = "PDF export failed. Is server running?";
+        try {
+          const data = await response.json();
+          if (data?.error) errorMessage = data.error;
+        } catch {
+          const text = await response.text();
+          if (text) errorMessage = text;
+        }
+        throw new Error(errorMessage);
+      }
+
+      const blob = await response.blob();
+      const url = URL.createObjectURL(blob);
+      const disposition = response.headers.get("content-disposition") || "";
+      const match = disposition.match(/filename="([^"]+)"/i);
+      const downloadName = match?.[1] || options.fileName || "chatgpt-export.pdf";
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = downloadName;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(url);
+      if (progressToast) progressToast.remove();
+      showToast("PDF generated successfully!", "success");
+      closeModal();
+    } catch (err) {
+      if (progressToast) progressToast.remove();
+      showToast(err?.message || "PDF export failed. Is server running?", "error");
+    } finally {
+      setExporting(false);
     }
+  }
+
+  downloadBtn.onclick = () => {
+    if (!editor.value.trim()) {
+      showToast("Paste something first!", "error");
+      return;
+    }
+    openModal();
   };
+
+  exportClose?.addEventListener("click", closeModal);
+  exportCancel?.addEventListener("click", closeModal);
+  exportBackdrop?.addEventListener("click", closeModal);
+  exportConfirm?.addEventListener("click", doExport);
+
+  window.addEventListener("keydown", (e) => {
+    if (e.key === "Escape" && exportModal?.classList.contains("open")) {
+      closeModal();
+    }
+  });
 
   /* =========================================================
      PANEL RESIZE + PERSISTENCE
@@ -306,18 +457,58 @@ document.addEventListener("DOMContentLoaded", () => {
 
 });
 
-function showToast(message, type = "success") {
+function showToast(message, type = "success", options = {}) {
   const container = document.getElementById("toastContainer");
 
   const toast = document.createElement("div");
   toast.className = `toast ${type}`;
-  toast.textContent = message;
+
+  const content = document.createElement("div");
+  content.className = "toast-content";
+
+  const text = document.createElement("span");
+  text.className = "toast-text";
+  text.textContent = message;
+
+  const closeBtn = document.createElement("button");
+  closeBtn.className = "toast-close";
+  closeBtn.type = "button";
+  closeBtn.setAttribute("aria-label", "Dismiss notification");
+  closeBtn.innerHTML = "&times;";
+
+  content.appendChild(text);
+  content.appendChild(closeBtn);
+  toast.appendChild(content);
+
+  const loader = document.createElement("div");
+  loader.className = "toast-loader";
+  if (options.loader === false) {
+    loader.classList.add("hidden");
+  }
+  if (typeof options.loaderDurationMs === "number") {
+    loader.style.setProperty("--toast-loader-duration", `${options.loaderDurationMs}ms`);
+  }
+  toast.appendChild(loader);
 
   container.appendChild(toast);
 
   requestAnimationFrame(() => toast.classList.add("show"));
+  if (!loader.classList.contains("hidden")) {
+    requestAnimationFrame(() => loader.classList.add("fill"));
+  }
 
-  setTimeout(() => toast.remove(), 2500);
+  const autoDismissMs = options.autoDismissMs ?? 2500;
+  let timer = null;
+  if (autoDismissMs !== false) {
+    timer = setTimeout(() => toast.remove(), autoDismissMs);
+  }
+
+  closeBtn.addEventListener("click", () => {
+    if (timer) clearTimeout(timer);
+    toast.remove();
+  });
+
+  return toast;
 }
 
 const editor = document.getElementById("editor");

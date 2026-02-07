@@ -3,7 +3,7 @@
 
 <head>
   <meta charset="UTF-8" />
-  <title>ChatGPT → Perfect PDF</title>
+  <title>MD → Perfect PDF</title>
 
   <!-- Responsive safety -->
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -18,7 +18,7 @@
   <!-- ================= NAVBAR ================= -->
   <nav>
     <div class="nav-title">
-      ChatGPT &#10132; Perfect PDF
+      MD &#10132; Perfect PDF
     </div>
 
     <div class="nav-actions">
@@ -43,12 +43,15 @@
                7 7 0 0021 12.79z" />
         </svg>
       </button>
-
       <!-- Download -->
       <button id="download" class="icon-btn download-btn" title="Download PDF" aria-label="Download PDF">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
-          <path fill="currentColor"
-            d="M12 3v12m0 0l4-4m-4 4l-4-4M5 21h14" />
+          <path
+            d="M12 3v12m0 0l4-4m-4 4l-4-4M5 21h14"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round" />
         </svg>
       </button>
     </div>
@@ -58,7 +61,7 @@
   <main>
     <!-- Editor -->
     <div id="editorWrap" class="scroll-wrapper">
-      <textarea id="editor" placeholder="Paste ChatGPT response here..."></textarea>
+      <textarea id="editor" placeholder="Paste Markdown here..."></textarea>
     </div>
 
     <!-- Resizer -->
@@ -71,8 +74,8 @@
       <!-- Empty State -->
       <div id="emptyState">
         <div class="empty-inner">
-          <h2>ChatGPT → Perfect PDF</h2>
-          <p>Paste your ChatGPT response on the left.</p>
+          <h2>MD → Perfect PDF</h2>
+          <p>Paste your Markdown on the left.</p>
           <p>Edit it, preview it, then export a clean PDF.</p>
           <span>Nothing is uploaded. Everything stays local.</span>
         </div>
@@ -84,6 +87,112 @@
   <script src="marked.min.js"></script>
   <script src="highlight.min.js"></script>
   <script src="editor.js"></script>
+
+  <!-- ================= EXPORT MODAL ================= -->
+  <div id="exportModal" class="modal" aria-hidden="true" role="dialog" aria-labelledby="exportTitle">
+    <div class="modal-backdrop" data-close="true"></div>
+    <div class="modal-card" role="document">
+      <div class="modal-header">
+        <div>
+          <h2 id="exportTitle">Export PDF</h2>
+          <p class="modal-subtitle">Customize how your document is generated</p>
+        </div>
+        <button class="icon-btn modal-close" id="exportClose" aria-label="Close dialog">&times;</button>
+      </div>
+
+      <div class="modal-body">
+        <section class="modal-section">
+          <h3>Page Settings</h3>
+          <div class="field-row">
+            <div class="field">
+              <label class="field-label">Page Size</label>
+              <div class="segmented">
+                <label><input type="radio" name="pageSize" value="A4" checked><span>A4</span></label>
+                <label><input type="radio" name="pageSize" value="Letter"><span>Letter</span></label>
+                <label><input type="radio" name="pageSize" value="Legal"><span>Legal</span></label>
+              </div>
+            </div>
+            <div class="field">
+              <label class="field-label">Orientation</label>
+              <div class="segmented">
+                <label><input type="radio" name="orientation" value="portrait" checked><span>Portrait</span></label>
+                <label><input type="radio" name="orientation" value="landscape"><span>Landscape</span></label>
+              </div>
+            </div>
+          </div>
+          <div class="field">
+            <label class="field-label" for="margin">Margins</label>
+            <select id="margin">
+              <option value="compact">Compact</option>
+              <option value="normal" selected>Normal</option>
+              <option value="spacious">Spacious</option>
+            </select>
+          </div>
+        </section>
+
+        <section class="modal-section">
+          <h3>Content Options</h3>
+          <div class="field-row">
+            <label class="checkbox"><input type="checkbox" id="includePageNumbers" checked> Include page numbers</label>
+            <label class="checkbox"><input type="checkbox" id="includeTitle"> Include document title</label>
+            <label class="checkbox"><input type="checkbox" id="includeDateTime"> Include date/time</label>
+          </div>
+          <div class="field">
+            <label class="field-label" for="pageBreaks">Page Break Handling</label>
+            <select id="pageBreaks">
+              <option value="auto" selected>Automatic</option>
+              <option value="respect">Respect --- separators</option>
+              <option value="none">No page breaks</option>
+            </select>
+          </div>
+        </section>
+
+        <section class="modal-section">
+          <h3>Theme & Font</h3>
+          <div class="field-row">
+            <div class="field">
+              <label class="field-label">Theme</label>
+              <div class="segmented">
+                <label><input type="radio" name="theme" value="match" checked><span>Match editor</span></label>
+                <label><input type="radio" name="theme" value="light"><span>Light</span></label>
+                <label><input type="radio" name="theme" value="dark"><span>Dark</span></label>
+              </div>
+            </div>
+            <div class="field">
+              <label class="field-label" for="fontFamily">Font</label>
+              <select id="fontFamily">
+                <option value="Inter" selected>Inter</option>
+                <option value="Roboto">Roboto</option>
+                <option value="Serif">Serif (Times)</option>
+              </select>
+              <div class="font-preview">The quick brown fox jumps over the lazy dog.</div>
+            </div>
+          </div>
+        </section>
+
+        <section class="modal-section">
+          <h3>Output</h3>
+          <div class="field">
+            <label class="field-label" for="fileName">File Name</label>
+            <input id="fileName" type="text" value="chatgpt-export.pdf" />
+          </div>
+          <div class="field-row">
+            <label class="checkbox"><input type="checkbox" id="autoOpen"> Auto-open after download</label>
+            <label class="checkbox"><input type="checkbox" id="copyPath"> Copy file path</label>
+            <label class="checkbox"><input type="checkbox" id="rememberSettings" checked> Save last used settings</label>
+          </div>
+        </section>
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn ghost" id="exportCancel">Cancel</button>
+        <button class="btn primary" id="exportConfirm">
+          <span class="btn-label">Export PDF</span>
+          <span class="btn-spinner" aria-hidden="true"></span>
+        </button>
+      </div>
+    </div>
+  </div>
 
   <div id="toastContainer" class="toast-container"></div>
 
