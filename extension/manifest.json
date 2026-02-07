@@ -6,7 +6,10 @@
   "description": "Turn Markdown into clean, print-ready PDFs with live preview and export controls.",
   "minimum_chrome_version": "114",
   "permissions": ["storage"],
-  "host_permissions": ["http://localhost:3000/*"],
+  "host_permissions": [
+    "http://localhost:3000/*",
+    "https://chatgpt-pdf-extension.onrender.com/*"
+  ],
   "action": {
     "default_popup": "popup.html",
     "default_title": "MD to Perfect PDF"

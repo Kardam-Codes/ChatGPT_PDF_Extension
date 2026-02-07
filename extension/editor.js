@@ -301,6 +301,15 @@ document.addEventListener("DOMContentLoaded", () => {
     exportModal.classList.toggle("exporting", isExporting);
   }
 
+  const EXPORT_ENDPOINT = "http://localhost:3000/export";
+  const PROD_EXPORT_ENDPOINT = "https://chatgpt-pdf-extension.onrender.com/export";
+
+  function getExportEndpoint() {
+    return document.body.dataset.exportEnv === "prod"
+      ? PROD_EXPORT_ENDPOINT
+      : EXPORT_ENDPOINT;
+  }
+
   async function doExport() {
     const styles = Array.from(document.styleSheets)
       .map(sheet => {
@@ -328,7 +337,7 @@ document.addEventListener("DOMContentLoaded", () => {
     setExporting(true);
 
     try {
-      const response = await fetch("http://localhost:3000/export", {
+      const response = await fetch(getExportEndpoint(), {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload)

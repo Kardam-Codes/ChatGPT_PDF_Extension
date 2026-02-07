@@ -54,6 +54,22 @@ Open the extension → paste content → preview → Download PDF
 
 You will use that URL in the extension’s `host_permissions` and fetch calls.
 
+---
+
+## ⚙️ Environment Switch (Local vs Production)
+
+The editor supports a simple environment toggle.
+
+### Local (default)
+- `extension/editor.html` should have:
+  - `<body data-export-env="local">`
+- Uses: `http://localhost:3000/export`
+
+### Production
+- Set to:
+  - `<body data-export-env="prod">`
+- Uses: `https://chatgpt-pdf-extension.onrender.com/export`
+
 
 ## 🚀 Features
 
