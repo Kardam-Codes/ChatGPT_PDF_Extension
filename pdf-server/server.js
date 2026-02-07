@@ -71,7 +71,9 @@ app.post("/export", async (req, res) => {
       args: [
         "--no-sandbox",
         "--disable-setuid-sandbox",
-        "--font-render-hinting=medium"
+        "--font-render-hinting=medium",
+        "--disable-dev-shm-usage",
+        "--disable-gpu"
       ]
     });
 
